@@ -20,19 +20,18 @@ public class TweetsTopology {
     public static StormTopology getInstance() {
         TopologyBuilder builder = new TopologyBuilder();
 
-        TweetsSpout tweetsSpout = new TweetsSpout(Arrays.asList("meetup", "java", "python"), null);
+        TweetsSpout tweetsSpout = new TweetsSpout(new String[] {"meetup", "java", "python"});
         builder.setSpout("input-tweets", tweetsSpout, 1);
 
         TweetParser parser = new TweetParser();
         builder.setBolt("parser-tweets", parser).shuffleGrouping("input-tweets");
 
-        builder.setBolt("stats-tweets-windowed",
-            new HashtagStats().withWindow(new BaseWindowedBolt.Count(50))).shuffleGrouping("parser-tweets");
+        builder.setBolt("stats-tweets-windowed", new HashtagStats()).shuffleGrouping("parser-tweets");
 
-        FilterBolt fiterUsers = new FilterBolt("user_id", Arrays.<Object>asList(28840870L, 736936425409683456L));
+        FilterBolt fiterUsers = new FilterBolt("user_id", new Long[] {28840870L, 736936425409683456L});
         builder.setBolt("filter-users", fiterUsers).shuffleGrouping("parser-tweets");
 
-        FilterHashtags filterHashtags = new FilterHashtags(Arrays.asList("test", "hahstag"));
+        FilterHashtags filterHashtags = new FilterHashtags(new String[] {"test", "hahstag"});
         builder.setBolt("filter-hashtags", filterHashtags).shuffleGrouping("filter-users");
 
         PrinterBolt printerBolt = new PrinterBolt();

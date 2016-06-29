@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.apache.storm.topology.BasicOutputCollector;
 import org.apache.storm.tuple.Tuple;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -15,6 +16,9 @@ public class FilterHashtags extends TweetBolt {
 
     private List<String> hashtags;
 
+    public FilterHashtags(String[] hashtags) {
+        this.hashtags = Arrays.asList(hashtags);
+    }
 
     public void execute(Tuple tuple, BasicOutputCollector collector) {
         List<String> tweeetHashtags = (List<String>) tuple.getValueByField("hashtags");

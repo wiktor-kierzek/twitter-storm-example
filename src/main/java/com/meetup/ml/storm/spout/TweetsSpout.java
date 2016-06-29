@@ -17,6 +17,7 @@ import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -28,10 +29,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Slf4j
 public class TweetsSpout extends BaseRichSpout {
 
-    private static String ACCESS_TOKEN = "";
-    private static String ACCESS_TOKEN_SECRET = "";
-    private static String CONSUMER_KEY = "";
-    private static String CONSUMER_SECRET = "";
+    private static String ACCESS_TOKEN = "28840870-LHgFC5LjVhPtLwJzq2UrMQVB49uWqBeGq8sTOgzhU";
+    private static String ACCESS_TOKEN_SECRET = "JO0y6SXRSM5snRNRyEXrefr7FhoIGWXhk982zvf7gODGs";
+    private static String CONSUMER_KEY = "YqVB1bjECOCShoy8ecl942G8K";
+    private static String CONSUMER_SECRET = "eWHNiB6r9LOtLvICBxxFHKiFA3yy2p4stusFzZAeMRo2l9CyzR";
 
     private List<String> trackedTerms;
     private List<Long> trackedUsers;
@@ -39,9 +40,14 @@ public class TweetsSpout extends BaseRichSpout {
     private BlockingQueue<String> tweets = new LinkedBlockingQueue<String>(1000);
     private SpoutOutputCollector collector;
 
-    public TweetsSpout(List<String> trackedTerms, List<Long> trackedUsers) {
-        this.trackedTerms = trackedTerms;
-        this.trackedUsers = trackedUsers;
+    public TweetsSpout(String[] trackedTerms) {
+        this.trackedTerms = Arrays.asList(trackedTerms);
+        this.trackedUsers = null;
+    }
+
+    public TweetsSpout(String[] trackedTerms, Long[] trackedUsers) {
+        this.trackedTerms = Arrays.asList(trackedTerms);
+        this.trackedUsers = Arrays.asList(trackedUsers);
     }
 
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
@@ -52,7 +58,6 @@ public class TweetsSpout extends BaseRichSpout {
         collector = spoutOutputCollector;
 
         Hosts hosts = new HttpHosts(Constants.STREAM_HOST);
-
         StatusesFilterEndpoint filter = new StatusesFilterEndpoint();
 
         if(trackedTerms!=null) {
@@ -85,6 +90,10 @@ public class TweetsSpout extends BaseRichSpout {
     }
 
     public void nextTuple() {
+        if(tweets.isEmpty()) {
+            return;
+        }
+
         try {
             String message = tweets.take();
             collector.emit(new Values(message));

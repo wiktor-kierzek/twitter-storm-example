@@ -20,6 +20,11 @@ public class HashtagStats extends BaseWindowedBolt {
 
     private OutputCollector collector;
 
+    public HashtagStats() {
+        super();
+        this.withWindow(new BaseWindowedBolt.Count(50));
+    }
+
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;

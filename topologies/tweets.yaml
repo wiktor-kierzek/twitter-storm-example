@@ -1,0 +1,61 @@
+name: "tweets"
+config:
+    topology.workers: 2
+
+spouts:
+    -   id: "input-tweets"
+        className: "com.meetup.ml.storm.spout.TweetsSpout"
+        constructorArgs:
+            -   ["meetup", "java", "python"]
+
+bolts:
+    -   id: "parser-tweets"
+        className: "com.meetup.ml.storm.bolt.process.TweetParser"
+
+    -   id: "stats-tweets-windowed"
+        className: "com.meetup.ml.storm.bolt.process.HashtagStats"
+
+    -   id: "filter-users"
+        className: "com.meetup.ml.storm.bolt.process.FilterBolt"
+        constructorArgs:
+            -   "user_id"
+            -   [28840870, 736936425409683456]
+
+    -   id: "filter-hashtags"
+        className: "com.meetup.ml.storm.bolt.process.FilterHashtags"
+        constructorArgs:
+            -   ["test", "hahstag"]
+
+    -   id: "printer"
+        className: "com.meetup.ml.storm.bolt.reporting.PrinterBolt"
+
+streams:
+    -   from: "input-tweets"
+        to: "parser-tweets"
+        grouping:
+            type: SHUFFLE
+
+    -   from: "parser-tweets"
+        to: "stats-tweets-windowed"
+        grouping:
+            type: SHUFFLE
+
+    -   from: "parser-tweets"
+        to: "filter-users"
+        grouping:
+            type: SHUFFLE
+
+    -   from: "filter-users"
+        to: "filter-hashtags"
+        grouping:
+            type: SHUFFLE
+
+    -   from: "filter-hashtags"
+        to: "printer"
+        grouping:
+            type: SHUFFLE
+
+    -   from: "stats-tweets-windowed"
+        to: "printer"
+        grouping:
+            type: SHUFFLE

@@ -18,7 +18,7 @@ public class PrinterBolt extends BaseBasicBolt {
     public void execute(Tuple tuple, BasicOutputCollector basicOutputCollector) {
         switch (tuple.getSourceComponent()) {
             case "stats-tweets-windowed":
-                log.info("Current stats: {}",
+                log.info("Current stats: \n{}",
                     Arrays.toString(((List<String>) tuple.getValueByField("stats")).toArray())
                 );
                 break;
